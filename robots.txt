@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zirignon.github.io/ivoire-electromenager/sitemap.xml
