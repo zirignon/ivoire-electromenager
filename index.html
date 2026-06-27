@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ivoire Électroménagers - Électroménagers en Côte d'Ivoire</title>
+
+    <meta name="description" content="Ivoire Électroménagers vous propose des réfrigérateurs, climatiseurs, lave-linges, fours, micro-ondes et appareils électroménagers de qualité en Côte d'Ivoire. Livraison rapide à Abidjan et partout en Côte d'Ivoire.">
+
+    <meta name="theme-color" content="#004E89">
+
+    <!-- Open Graph pour Facebook, WhatsApp et réseaux sociaux -->
+    <meta property="og:title" content="Ivoire Électroménagers - Qualité & Fiabilité">
+    <meta property="og:description" content="Découvrez nos électroménagers premium aux meilleurs prix en Côte d'Ivoire. Réfrigérateurs, climatiseurs, lave-linges, fours et plus encore.">
+    <meta property="og:image" content="logo.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_CI">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+
+    <link rel="icon" href="logo.jpg" type="image/jpeg">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="logo.jpg" alt="Ivoire Électroménagers" class="logo">
+                    <div class="brand-text">
+                        <h1>Ivoire Électroménagers</h1>
+                        <p class="tagline">Qualité & Fiabilité</p>
+                    </div>
+                </div>
+                <nav class="nav" aria-label="Navigation principale">
+                    <a href="#accueil" class="nav-link">Accueil</a>
+                    <a href="#produits" class="nav-link">Produits</a>
+                    <a href="#promo" class="nav-link">Promotions</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </nav>
+                <button class="cart-icon" type="button" onclick="toggleCart()" aria-label="Ouvrir le panier">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section with Slider -->
+    <section class="hero" id="accueil">
+        <div class="hero-slider">
+            <div class="hero-slide active" style="background-image: url('banniere.jpg')"></div>
+            <div class="hero-slide" style="background-image: url('banniere.jpg')"></div>
+            <div class="hero-slide" style="background-image: url('banniere.jpg')"></div>
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <span class="hero-badge">Bienvenue</span>
+                <h2 class="hero-title">Électroménagers Premium</h2>
+                <p class="hero-subtitle">Les meilleures marques à vos meilleurs prix</p>
+                <a href="#produits" class="btn btn-primary btn-lg">
+                    <span>Explorer nos produits</span>
+                    <span class="btn-arrow" aria-hidden="true">→</span>
+                </a>
+            </div>
+        </div>
+        <div class="slider-dots" aria-label="Navigation du diaporama">
+            <button class="dot active" type="button" onclick="goToSlide(0)" aria-label="Afficher la diapositive 1"></button>
+            <button class="dot" type="button" onclick="goToSlide(1)" aria-label="Afficher la diapositive 2"></button>
+            <button class="dot" type="button" onclick="goToSlide(2)" aria-label="Afficher la diapositive 3"></button>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="produits" id="produits">
+        <div class="container">
+            <h2 class="section-title">Notre Catalogue Complet</h2>
+            <div class="filter-tags">
+                <button class="tag-btn active" data-category="all" onclick="filterProducts('all', this)">Tous</button>
+                <button class="tag-btn" data-category="refrigeration" onclick="filterProducts('refrigeration', this)">Réfrigération</button>
+                <button class="tag-btn" data-category="washing" onclick="filterProducts('washing', this)">Lavage</button>
+                <button class="tag-btn" data-category="cooking" onclick="filterProducts('cooking', this)">Cuisson</button>
+                <button class="tag-btn" data-category="climate" onclick="filterProducts('climate', this)">Climatisation</button>
+                <button class="tag-btn" data-category="other" onclick="filterProducts('other', this)">Autre</button>
+            </div>
+            <div class="products-grid" id="productsContainer">
+                <!-- Produits générés par JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Promotions Section -->
+    <section class="promo-section" id="promo">
+        <div class="container">
+            <h2 class="section-title">🔥 Offres du Mois</h2>
+            <div class="promo-cards">
+                <div class="promo-card" data-aos="zoomIn">
+                    <div class="promo-badge">-30%</div>
+                    <img src="refrigerateur.png" alt="Réfrigérateur Samsung">
+                    <div class="promo-content">
+                        <h3>Réfrigérateur Samsung</h3>
+                        <p class="promo-price"><span class="old-price">450.000 FCFA</span> <span class="new-price">315.000 FCFA</span></p>
+                        <button class="btn-add promo-add-btn" type="button" onclick="addPromoToCart(101)">Ajouter au panier</button>
+                    </div>
+                </div>
+                <div class="promo-card" data-aos="zoomIn" data-aos-delay="100">
+                    <div class="promo-badge">-25%</div>
+                    <img src="climatiseur.png" alt="Climatiseur Daikin">
+                    <div class="promo-content">
+                        <h3>Climatiseur Daikin</h3>
+                        <p class="promo-price"><span class="old-price">600.000 FCFA</span> <span class="new-price">450.000 FCFA</span></p>
+                        <button class="btn-add promo-add-btn" type="button" onclick="addPromoToCart(102)">Ajouter au panier</button>
+                    </div>
+                </div>
+                <div class="promo-card" data-aos="zoomIn" data-aos-delay="200">
+                    <div class="promo-badge">-20%</div>
+                    <img src="lavelinge.png" alt="Lave-linge LG">
+                    <div class="promo-content">
+                        <h3>Lave-linge LG</h3>
+                        <p class="promo-price"><span class="old-price">380.000 FCFA</span> <span class="new-price">304.000 FCFA</span></p>
+                        <button class="btn-add promo-add-btn" type="button" onclick="addPromoToCart(103)">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title" style="margin-bottom: 3rem;">Pourquoi nous choisir ?</h2>
+            <div class="features-grid">
+                <div class="feature-card" data-aos="fadeUp">
+                    <div class="feature-icon">🚚</div>
+                    <h3>Livraison Rapide</h3>
+                    <p>Partout en Côte d'Ivoire en 24-48h</p>
+                </div>
+                <div class="feature-card" data-aos="fadeUp" data-aos-delay="100">
+                    <div class="feature-icon">💰</div>
+                    <h3>Prix Garantis</h3>
+                    <p>Les meilleurs prix du marché</p>
+                </div>
+                <div class="feature-card" data-aos="fadeUp" data-aos-delay="200">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Sécurisé</h3>
+                    <p>Paiement sécurisé et garanti</p>
+                </div>
+                <div class="feature-card" data-aos="fadeUp" data-aos-delay="300">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Service Client</h3>
+                    <p>Support 24/7 pour votre satisfaction</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title">Ce que disent nos clients</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card" data-aos="fadeUp">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p>"Excellent service et livraison rapide. Vraiment satisfait !"</p>
+                    <div class="testimonial-author">
+                        <strong>Jean Kouassi</strong>
+                        <span>Abidjan</span>
+                    </div>
+                </div>
+                <div class="testimonial-card" data-aos="fadeUp" data-aos-delay="100">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p>"Les prix sont les meilleurs du marché. Je recommande !"</p>
+                    <div class="testimonial-author">
+                        <strong>Marie Diallo</strong>
+                        <span>Yamoussoukro</span>
+                    </div>
+                </div>
+                <div class="testimonial-card" data-aos="fadeUp" data-aos-delay="200">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p>"Service client impeccable, très professionnels !"</p>
+                    <div class="testimonial-author">
+                        <strong>Ahmed Traoré</strong>
+                        <span>Bouaké</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2>Abonnez-vous à notre Newsletter</h2>
+                <p>Recevez les meilleures offres directement dans votre boîte mail</p>
+                <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+                    <input type="email" placeholder="Votre email" autocomplete="email" required>
+                    <button type="submit" class="btn btn-primary">S'abonner</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shopping Cart Sidebar -->
+    <aside class="cart-sidebar" id="cartSidebar" aria-label="Panier">
+        <div class="cart-header">
+            <h2>Mon Panier</h2>
+            <button class="close-btn" type="button" onclick="toggleCart()" aria-label="Fermer le panier">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <p class="empty-cart">Votre panier est vide</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <strong>Total : </strong>
+                <span id="cartTotal">0 FCFA</span>
+            </div>
+            <button class="btn btn-secondary btn-clear-cart" type="button" onclick="clearCart()">Vider le panier</button>
+
+            <button class="btn btn-primary btn-block" type="button" onclick="openCheckoutForm()">Passer la commande</button>
+        </div>
+    </aside>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content checkout-modal">
+            <button class="close-modal" type="button" onclick="closeCheckout()" aria-label="Fermer la commande">✕</button>
+            <div class="checkout-body">
+                <h2>Confirmer votre commande</h2>
+                <form id="checkoutForm" onsubmit="processCheckout(event)">
+                    <div class="form-group">
+                        <label for="checkoutName">Nom complet *</label>
+                        <input id="checkoutName" type="text" placeholder="Entrez votre nom" autocomplete="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutPhone">Téléphone *</label>
+                        <input id="checkoutPhone" type="tel" placeholder="Entrez votre numéro" autocomplete="tel" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutAddress">Adresse de livraison *</label>
+                        <textarea id="checkoutAddress" placeholder="Entrez votre adresse complète" autocomplete="street-address" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutEmail">Email</label>
+                        <input id="checkoutEmail" type="email" placeholder="Votre email (optionnel)" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutPayment">Moyen de paiement *</label>
+                        <select id="checkoutPayment" required>
+                            <option value="">Choisir un moyen de paiement</option>
+                            <option value="livraison">Paiement à la livraison</option>
+                            <option value="OMCIV2">Orange Money CI</option>
+                            <option value="MOMOCI">MTN Mobile Money CI</option>
+                            <option value="FLOOZ">Moov Money CI</option>
+                            <option value="WAVECI">Wave CI</option>
+                            <option value="CARD">Visa / Mastercard</option>
+                        </select>
+                    </div>
+                    <div class="order-summary">
+                        <h3>Récapitulatif de la commande</h3>
+                        <div id="orderSummary"></div>
+                        <div class="order-total">
+                            <strong>Total à payer :</strong>
+                            <span id="checkoutTotal">0 FCFA</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 2rem;">Confirmer la commande</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <button class="close-modal" type="button" onclick="closeModal()" aria-label="Fermer la fiche produit">✕</button>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img id="modalImage" src="" alt="" class="modal-image">
+                </div>
+                <div class="modal-info">
+                    <h2 id="modalTitle"></h2>
+                    <div class="modal-rating">⭐⭐⭐⭐⭐ (124 avis)</div>
+                    <p id="modalDescription"></p>
+                    <div class="price-section">
+                        <span class="price" id="modalPrice"></span>
+                        <div class="quantity-control">
+                            <button type="button" onclick="decreaseQuantity()" aria-label="Diminuer la quantité">-</button>
+                            <input type="number" id="quantityInput" value="1" min="1" aria-label="Quantité">
+                            <button type="button" onclick="increaseQuantity()" aria-label="Augmenter la quantité">+</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" type="button" onclick="addToCartFromModal()">Ajouter au panier</button>
+                    <button class="btn btn-secondary btn-block" type="button" onclick="closeModal()">Continuer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlays -->
+    <div class="overlay" id="overlay" onclick="toggleCart()"></div>
+    <div class="modal-overlay" id="modalOverlay" onclick="closeActiveModal()"></div>
+
+    <!-- Contact Section -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>À propos</h3>
+                    <p>Ivoire Électroménagers est votre partenaire de confiance pour tous vos besoins en électroménagers.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>📞 Nous contacter</h3>
+                    <p>+225 01 41 36 47 16<br>contact@ivoireelectro.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>📍 Localisation</h3>
+                    <p>Abidjan, Côte d'Ivoire<br>Livraison partout</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Suivez-nous</h3>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/profile.php?id=61590365307201" target="_blank" rel="noopener noreferrer" class="social-link facebook">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                            Facebook
+                        </a>
+                        <a href="https://wa.me/2250141364716" target="_blank" rel="noopener noreferrer" class="social-link whatsapp">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a6.963 6.963 0 00-6.961 6.961 6.964 6.964 0 006.961 6.961h.004a6.964 6.964 0 006.96-6.96 6.964 6.964 0 00-6.96-6.962M24 12c0 6.627-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0s12 5.373 12 12z"/>
+                            </svg>
+                            WhatsApp
+                        </a>
+                        <a href="tel:+2250141364716" class="social-link call">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            Appeler
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <p class="copyright">&copy; 2026 Ivoire Électroménagers. Tous droits réservés.</p>
+            <p>
+                <a href="conditions.html">Conditions générales</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- SDK PAYEMENT PRO -->
+    <script src="https://www.paiementpro.net/webservice/onlinepayment/js/paiementpro.v1.0.1.js"></script>
+    <script src="script.js?v=10"></script>
+</body>
+</html>
