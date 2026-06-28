@@ -186,108 +186,49 @@
     <script src="script.js?v=11"></script>
 
     <!-- Script spécifique à la connexion admin -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            updateAdminView();
-        });
+   <!-- Script spécifique à la connexion admin -->
+<script>
+    // Configuration Supabase pour l’admin
+    const SUPABASE_URL = 'https://sootfuydjmfwvssjtkni.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_0Y9sd23upHv4CY3KmO9Nag_rwPXI2iA';
 
-        async function loginAdmin(e) {
-            e.preventDefault();
+    // Création du client Supabase utilisé par l’admin
+    const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
 
-            const emailInput = document.getElementById('adminEmail');
-            const passwordInput = document.getElementById('adminPassword');
-            const message = document.getElementById('loginMessage');
+    document.addEventListener('DOMContentLoaded', function() {
+        updateAdminView();
+    });
 
-            if (!emailInput || !passwordInput || !message) {
-                alert('Erreur : champs de connexion introuvables.');
-                return;
-            }
+    async function loginAdmin(e) {
+        e.preventDefault();
 
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+        const emailInput = document.getElementById('adminEmail');
+        const passwordInput = document.getElementById('adminPassword');
+        const message = document.getElementById('loginMessage');
 
-            message.textContent = 'Connexion en cours...';
-            message.style.color = '#555';
+        if (!emailInput || !passwordInput || !message) {
+            alert('Erreur : champs de connexion introuvables.');
+            return;
+        }
 
-            try {
-                const { error } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
-                });
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
 
-                if (error) {
-                    message.textContent = 'Email ou mot de passe incorrect.';
-                    message.style.color = '#e74c3c';
-                    return;
-                }
+        message.textContent = 'Connexion en cours...';
+        message.style.color = '#555';
 
-                const isAdmin = await checkCurrentUserIsAdmin();
+        try {
+            const { error } = await supabaseClient.auth.signInWithPassword({
+                email,
+                password
+            });
 
-                if (!isAdmin) {
-                    await supabaseClient.auth.signOut();
-
-                    message.textContent = 'Accès refusé : ce compte n’est pas administrateur.';
-                    message.style.color = '#e74c3c';
-                    return;
-                }
-
-                message.textContent = '';
-                passwordInput.value = '';
-
-                await updateAdminView();
-            } catch (error) {
-                console.error('Erreur connexion admin:', error);
-                message.textContent = 'Erreur de connexion.';
+            if (error) {
+                message.textContent = 'Email ou mot de passe incorrect.';
                 message.style.color = '#e74c3c';
-            }
-        }
-
-        async function logoutAdmin() {
-            await supabaseClient.auth.signOut();
-
-            const emailInput = document.getElementById('adminEmail');
-            const passwordInput = document.getElementById('adminPassword');
-            const loginMessage = document.getElementById('loginMessage');
-            const adminMessage = document.getElementById('adminMessage');
-
-            if (emailInput) {
-                emailInput.value = '';
-            }
-
-            if (passwordInput) {
-                passwordInput.value = '';
-            }
-
-            if (loginMessage) {
-                loginMessage.textContent = '';
-            }
-
-            if (adminMessage) {
-                adminMessage.textContent = '';
-            }
-
-            await updateAdminView();
-        }
-
-        async function updateAdminView() {
-            const adminLogin = document.getElementById('adminLogin');
-            const adminDashboard = document.getElementById('adminDashboard');
-
-            if (!adminLogin || !adminDashboard) {
-                console.error('Sections admin introuvables.');
-                return;
-            }
-
-            const { data } = await supabaseClient.auth.getSession();
-            const isLoggedIn = Boolean(data.session);
-
-            if (!isLoggedIn) {
-                adminLogin.hidden = false;
-                adminLogin.style.display = 'flex';
-
-                adminDashboard.hidden = true;
-                adminDashboard.style.display = 'none';
-
                 return;
             }
 
@@ -296,54 +237,112 @@
             if (!isAdmin) {
                 await supabaseClient.auth.signOut();
 
-                adminLogin.hidden = false;
-                adminLogin.style.display = 'flex';
-
-                adminDashboard.hidden = true;
-                adminDashboard.style.display = 'none';
-
+                message.textContent = 'Accès refusé : ce compte n’est pas administrateur.';
+                message.style.color = '#e74c3c';
                 return;
             }
 
-            adminLogin.hidden = true;
-            adminLogin.style.display = 'none';
+            message.textContent = '';
+            passwordInput.value = '';
 
-            adminDashboard.hidden = false;
-            adminDashboard.style.display = 'block';
+            await updateAdminView();
+        } catch (error) {
+            console.error('Erreur connexion admin:', error);
+            message.textContent = 'Erreur de connexion.';
+            message.style.color = '#e74c3c';
+        }
+    }
 
-            if (typeof renderCustomProductsList === 'function') {
-                await renderCustomProductsList();
-            }
+    async function logoutAdmin() {
+        await supabaseClient.auth.signOut();
 
-            if (typeof window.filterOrders === 'function') {
-                await window.filterOrders();
-            }
+        const emailInput = document.getElementById('adminEmail');
+        const passwordInput = document.getElementById('adminPassword');
+        const loginMessage = document.getElementById('loginMessage');
+        const adminMessage = document.getElementById('adminMessage');
 
-            if (typeof updateAdminStats === 'function') {
-                await updateAdminStats();
-            }
+        if (emailInput) emailInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+        if (loginMessage) loginMessage.textContent = '';
+        if (adminMessage) adminMessage.textContent = '';
+
+        await updateAdminView();
+    }
+
+    async function updateAdminView() {
+        const adminLogin = document.getElementById('adminLogin');
+        const adminDashboard = document.getElementById('adminDashboard');
+
+        if (!adminLogin || !adminDashboard) {
+            console.error('Sections admin introuvables.');
+            return;
         }
 
-        async function checkCurrentUserIsAdmin() {
-            const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+        const { data } = await supabaseClient.auth.getSession();
+        const isLoggedIn = Boolean(data.session);
 
-            if (userError || !userData.user) {
-                return false;
-            }
+        if (!isLoggedIn) {
+            adminLogin.hidden = false;
+            adminLogin.style.display = 'flex';
 
-            const { data, error } = await supabaseClient
-                .from('admin_users')
-                .select('id')
-                .eq('user_id', userData.user.id)
-                .maybeSingle();
-
-            if (error) {
-                console.error('Erreur vérification admin:', error);
-                return false;
-            }
-
-            return Boolean(data);
+            adminDashboard.hidden = true;
+            adminDashboard.style.display = 'none';
+            return;
         }
-    </script>
+
+        const isAdmin = await checkCurrentUserIsAdmin();
+
+        if (!isAdmin) {
+            await supabaseClient.auth.signOut();
+
+            adminLogin.hidden = false;
+            adminLogin.style.display = 'flex';
+
+            adminDashboard.hidden = true;
+            adminDashboard.style.display = 'none';
+            return;
+        }
+
+        adminLogin.hidden = true;
+        adminLogin.style.display = 'none';
+
+        adminDashboard.hidden = false;
+        adminDashboard.style.display = 'block';
+
+        if (typeof renderCustomProductsList === 'function') {
+            await renderCustomProductsList();
+        }
+
+        if (typeof window.filterOrders === 'function') {
+            await window.filterOrders();
+        }
+
+        if (typeof updateAdminStats === 'function') {
+            await updateAdminStats();
+        }
+    }
+
+    async function checkCurrentUserIsAdmin() {
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+
+        if (userError || !userData.user) {
+            return false;
+        }
+
+        const { data, error } = await supabaseClient
+            .from('admin_users')
+            .select('id')
+            .eq('user_id', userData.user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error('Erreur vérification admin:', error);
+            return false;
+        }
+
+        return Boolean(data);
+    }
+</script>
 </body>
 </html>
+                   
