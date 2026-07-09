@@ -2562,7 +2562,7 @@ async function fetchProductsFromDatabase() {
             .from('products')
             .select('id, name, description, category, price, old_price, image, stock, is_promo, is_active, variants')
             .eq('is_active', true)
-            .order('id', { ascending: true });
+            .order('id', { ascending: false });
 
         if (error) {
             console.error('Erreur chargement produits Supabase :', error);
