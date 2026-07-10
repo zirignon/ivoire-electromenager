@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Suivi de commande — Ivoire Électroménagers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="logo.jpg" type="image/jpeg">
+    <style>
+        .suivi-page {
+            min-height: 100vh;
+            background: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .suivi-hero {
+            background: linear-gradient(135deg, #004E89, #1a73e8);
+            color: white;
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .suivi-hero h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .suivi-hero p {
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+
+        .suivi-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            width: 100%;
+        }
+
+        .suivi-search-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .suivi-search-card h2 {
+            font-size: 1.1rem;
+            color: #1a1a2e;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .suivi-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .suivi-input {
+            flex: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .suivi-input:focus {
+            border-color: #1a73e8;
+        }
+
+        .suivi-input::placeholder {
+            text-transform: none;
+            letter-spacing: 0;
+            color: #aaa;
+        }
+
+        .suivi-btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .suivi-btn:hover { background: #1557b0; transform: scale(1.02); }
+        .suivi-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+        .suivi-hint {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        /* Résultat */
+        .suivi-result {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: none;
+        }
+
+        .suivi-result.visible { display: block; }
+
+        .suivi-result-header {
+            background: linear-gradient(135deg, #004E89, #1a73e8);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .suivi-result-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .suivi-result-header p {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+
+        .suivi-result-body { padding: 1.5rem; }
+
+        .suivi-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .suivi-info-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .suivi-info-label {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .suivi-info-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        /* Statuts */
+        .suivi-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-nouvelle      { background: #e8f0fe; color: #1a73e8; }
+        .status-traitement    { background: #fff3cd; color: #f39c12; }
+        .status-livree        { background: #d4edda; color: #16a34a; }
+        .status-annulee       { background: #fde8e8; color: #e74c3c; }
+
+        .payment-confirmed    { color: #16a34a; }
+        .payment-pending      { color: #f39c12; }
+        .payment-failed       { color: #e74c3c; }
+        .payment-cod          { color: #1a73e8; }
+
+        /* Timeline statut */
+        .suivi-timeline {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .suivi-timeline::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 0;
+        }
+
+        .suivi-timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .suivi-timeline-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #e0e0e0;
+        }
+
+        .suivi-timeline-dot.active {
+            background: #1a73e8;
+            box-shadow: 0 0 0 2px #1a73e8;
+        }
+
+        .suivi-timeline-dot.done {
+            background: #16a34a;
+            box-shadow: 0 0 0 2px #16a34a;
+        }
+
+        .suivi-timeline-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-align: center;
+        }
+
+        .suivi-timeline-label.active { color: #1a73e8; font-weight: 600; }
+        .suivi-timeline-label.done   { color: #16a34a; font-weight: 600; }
+
+        /* Articles */
+        .suivi-items-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .suivi-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+        }
+
+        .suivi-item:last-child { border-bottom: none; }
+
+        .suivi-item-name { color: #1a1a2e; font-weight: 500; }
+        .suivi-item-qty  { color: #888; font-size: 0.8rem; }
+        .suivi-item-price{ font-weight: 600; color: #1a73e8; }
+
+        .suivi-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            margin-top: 8px;
+            border-top: 2px solid #1a73e8;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a1a2e;
+        }
+
+        /* Contact */
+        .suivi-contact {
+            background: #f0f4ff;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .suivi-contact a {
+            color: #1a73e8;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* Erreur */
+        .suivi-error {
+            background: #fde8e8;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            color: #c0392b;
+            display: none;
+        }
+
+        .suivi-error.visible { display: block; }
+        .suivi-error-icon { font-size: 2rem; margin-bottom: 8px; }
+        .suivi-error h3 { font-size: 1rem; margin-bottom: 4px; }
+        .suivi-error p  { font-size: 0.85rem; opacity: 0.85; }
+
+        /* Loading */
+        .suivi-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #888;
+            display: none;
+        }
+
+        .suivi-loading.visible { display: block; }
+
+        .suivi-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #1a73e8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .suivi-input-group { flex-direction: column; }
+            .suivi-btn { width: 100%; }
+            .suivi-info-grid { grid-template-columns: 1fr; }
+            .suivi-timeline-label { font-size: 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="suivi-page">
+
+    <!-- Header -->
+    <nav class="navbar" style="position:relative;">
+        <div class="nav-container">
+            <a class="nav-logo" href="index.html">
+                <img src="logo.jpg" alt="Ivoire Électroménagers" class="nav-logo-img">
+                <span class="nav-logo-text">Ivoire Électroménagers</span>
+            </a>
+            <a href="index.html" class="btn btn-secondary" style="font-size:0.85rem;padding:8px 16px;">
+                ← Retour au site
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="suivi-hero">
+        <h1>📦 Suivi de commande</h1>
+        <p>Entrez votre référence de commande pour connaître son statut en temps réel</p>
+    </div>
+
+    <div class="suivi-container">
+
+        <!-- Formulaire de recherche -->
+        <div class="suivi-search-card">
+            <h2>Rechercher ma commande</h2>
+            <div class="suivi-input-group">
+                <input
+                    type="text"
+                    class="suivi-input"
+                    id="referenceInput"
+                    placeholder="CMD-1782807914108"
+                    maxlength="30"
+                    onkeydown="if(event.key==='Enter') rechercherCommande()"
+                >
+                <button class="suivi-btn" id="searchBtn" onclick="rechercherCommande()">
+                    Rechercher
+                </button>
+            </div>
+            <p class="suivi-hint">
+                Votre référence commence par <strong>CMD-</strong> et se trouve dans votre email de confirmation.
+            </p>
+        </div>
+
+        <!-- Chargement -->
+        <div class="suivi-loading" id="suiviLoading">
+            <div class="suivi-spinner"></div>
+            <p>Recherche en cours...</p>
+        </div>
+
+        <!-- Erreur -->
+        <div class="suivi-error" id="suiviError">
+            <div class="suivi-error-icon">🔍</div>
+            <h3>Commande introuvable</h3>
+            <p>Vérifiez que la référence est correcte (ex: CMD-1782807914108) et réessayez.</p>
+        </div>
+
+        <!-- Résultat -->
+        <div class="suivi-result" id="suiviResult">
+
+            <div class="suivi-result-header">
+                <h3 id="resultRef">CMD-XXXXXXX</h3>
+                <p id="resultDate">—</p>
+            </div>
+
+            <div class="suivi-result-body">
+
+                <!-- Timeline -->
+                <div class="suivi-timeline" id="suiviTimeline"></div>
+
+                <!-- Infos -->
+                <div class="suivi-info-grid">
+                    <div class="suivi-info-item">
+                        <div class="suivi-info-label">Client</div>
+                        <div class="suivi-info-value" id="resultClient">—</div>
+                    </div>
+                    <div class="suivi-info-item">
+                        <div class="suivi-info-label">Téléphone</div>
+                        <div class="suivi-info-value" id="resultPhone">—</div>
+                    </div>
+                    <div class="suivi-info-item">
+                        <div class="suivi-info-label">Paiement</div>
+                        <div class="suivi-info-value" id="resultPayment">—</div>
+                    </div>
+                    <div class="suivi-info-item">
+                        <div class="suivi-info-label">Montant total</div>
+                        <div class="suivi-info-value" id="resultTotal">—</div>
+                    </div>
+                </div>
+
+                <!-- Articles -->
+                <div class="suivi-items-title">Articles commandés</div>
+                <div id="resultItems"></div>
+
+                <div class="suivi-total">
+                    <span>Total</span>
+                    <span id="resultTotalBottom">—</span>
+                </div>
+
+                <!-- Contact -->
+                <div class="suivi-contact">
+                    Un problème avec votre commande ?
+                    <a href="https://wa.me/2250141364716" target="_blank">
+                        Contactez-nous sur WhatsApp
+                    </a>
+                    ou par email à
+                    <a href="mailto:contact@ivoire-electromenagers.com">
+                        contact@ivoire-electromenagers.com
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL     = 'https://sootfuydjmfwvssjtkni.supabase.co';
+const SUPABASE_ANON_KEY= 'sb_publishable_0Y9sd23upHv4CY3KmO9Nag_rwPXI2iA';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function formatPrice(amount) {
+    return new Intl.NumberFormat('fr-FR').format(Number(amount)) + ' FCFA';
+}
+
+function formatDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('fr-FR', {
+        day: '2-digit', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+function getPaymentLabel(status, method) {
+    if (status === 'success')          return { text: '✅ Paiement confirmé', cls: 'payment-confirmed' };
+    if (status === 'cash_on_delivery') return { text: '🏠 Paiement à la livraison', cls: 'payment-cod' };
+    if (status === 'pending')          return { text: '⏳ En attente de paiement', cls: 'payment-pending' };
+    if (status === 'failed')           return { text: '❌ Paiement échoué', cls: 'payment-failed' };
+    return { text: status, cls: '' };
+}
+
+function buildTimeline(status) {
+    const steps = [
+        { key: 'Nouvelle',       label: 'Reçue',       icon: '📋' },
+        { key: 'En traitement',  label: 'Traitement',   icon: '⚙️' },
+        { key: 'Livrée',         label: 'Livrée',       icon: '🏠' },
+    ];
+
+    const order = ['Nouvelle', 'En traitement', 'Livrée'];
+    const currentIdx = order.indexOf(status);
+
+    return steps.map(function(step, i) {
+        let cls = '';
+        if (status === 'Annulée') {
+            cls = i === 0 ? 'done' : '';
+        } else {
+            if (i < currentIdx) cls = 'done';
+            else if (i === currentIdx) cls = 'active';
+        }
+        const labelCls = cls ? cls : '';
+        return `
+            <div class="suivi-timeline-step">
+                <div class="suivi-timeline-dot ${cls}">${step.icon}</div>
+                <div class="suivi-timeline-label ${labelCls}">${step.label}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function rechercherCommande() {
+    const input   = document.getElementById('referenceInput');
+    const ref     = input.value.trim().toUpperCase();
+    const loading = document.getElementById('suiviLoading');
+    const error   = document.getElementById('suiviError');
+    const result  = document.getElementById('suiviResult');
+    const btn     = document.getElementById('searchBtn');
+
+    if (!ref || !ref.startsWith('CMD-')) {
+        input.style.borderColor = '#e74c3c';
+        input.placeholder = 'La référence doit commencer par CMD-';
+        return;
+    }
+
+    input.style.borderColor = '#e0e0e0';
+    loading.classList.add('visible');
+    error.classList.remove('visible');
+    result.classList.remove('visible');
+    btn.disabled = true;
+
+    try {
+        // Charger la commande
+        const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('payment_reference', ref)
+            .single();
+
+        if (orderError || !order) {
+            loading.classList.remove('visible');
+            error.classList.add('visible');
+            btn.disabled = false;
+            return;
+        }
+
+        // Charger les articles
+        const { data: items } = await supabase
+            .from('order_items')
+            .select('*')
+            .eq('order_id', order.id);
+
+        // Remplir l'interface
+        document.getElementById('resultRef').textContent  = order.payment_reference;
+        document.getElementById('resultDate').textContent = 'Commande du ' + formatDate(order.created_at);
+        document.getElementById('resultClient').textContent = order.customer_name || '—';
+        document.getElementById('resultPhone').textContent  = order.customer_phone || '—';
+
+        const payment = getPaymentLabel(order.payment_status, order.payment_method);
+        const payEl   = document.getElementById('resultPayment');
+        payEl.textContent  = payment.text;
+        payEl.className    = 'suivi-info-value ' + payment.cls;
+
+        document.getElementById('resultTotal').textContent       = formatPrice(order.total);
+        document.getElementById('resultTotalBottom').textContent = formatPrice(order.total);
+
+        // Timeline
+        document.getElementById('suiviTimeline').innerHTML = buildTimeline(order.status);
+
+        // Articles
+        const itemsContainer = document.getElementById('resultItems');
+        if (items && items.length > 0) {
+            itemsContainer.innerHTML = items.map(function(item) {
+                return `
+                    <div class="suivi-item">
+                        <div>
+                            <div class="suivi-item-name">${item.product_name}</div>
+                            <div class="suivi-item-qty">Quantité : ${item.quantity}</div>
+                        </div>
+                        <div class="suivi-item-price">${formatPrice(item.subtotal || item.price * item.quantity)}</div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            itemsContainer.innerHTML = '<p style="color:#888;font-size:0.85rem;padding:10px 0;">Détail des articles non disponible.</p>';
+        }
+
+        loading.classList.remove('visible');
+        result.classList.add('visible');
+
+    } catch (err) {
+        console.error('Erreur suivi commande:', err);
+        loading.classList.remove('visible');
+        error.classList.add('visible');
+    }
+
+    btn.disabled = false;
+}
+
+// Vérifier si une référence est passée en URL (?ref=CMD-XXXXXXXXXX)
+window.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const ref    = params.get('ref');
+    if (ref) {
+        document.getElementById('referenceInput').value = ref;
+        rechercherCommande();
+    }
+});
+</script>
+</body>
+</html>
