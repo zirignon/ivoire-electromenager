@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>Administration - Ivoire Électroménagers</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css">
+    <link rel="icon" href="logo.jpg" type="image/jpeg">
+</head>
+
+<body>
+    <main class="admin-page">
+
+        <!-- Connexion admin -->
+        <section class="admin-login" id="adminLogin">
+            <div class="admin-panel">
+                <h1>Administration</h1>
+                <p class="admin-product-meta">
+                    Connectez-vous pour gérer les articles et les commandes.
+                </p>
+
+                <form onsubmit="loginAdmin(event)">
+                    <div class="form-group">
+                        <label for="adminEmail">Email admin</label>
+                        <input id="adminEmail" type="email" autocomplete="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminPassword">Mot de passe</label>
+                        <input id="adminPassword" type="password" autocomplete="current-password" required>
+                    </div>
+
+                    <button class="btn btn-primary btn-block" type="submit">
+                        Se connecter
+                    </button>
+
+                    <p class="admin-message" id="loginMessage" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Tableau de bord admin -->
+        <section class="admin-section admin-dashboard" id="adminDashboard" hidden>
+            <div class="container">
+
+                <div class="admin-topbar">
+                    <div>
+                        <h1>Gestion des articles</h1>
+                        <p>Ajoutez, affichez, masquez ou supprimez les produits du catalogue.</p>
+                    </div>
+
+                    <div class="admin-stats">
+                        <div class="admin-stat-card">
+                            <span class="admin-stat-number" id="adminProductsCount">0</span>
+                            <span class="admin-stat-label">Produits</span>
+                        </div>
+
+                        <div class="admin-stat-card">
+                            <span class="admin-stat-number" id="adminOrdersCount">0</span>
+                            <span class="admin-stat-label">Commandes</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-topbar-actions">
+                        <a class="btn btn-secondary" href="index.html">Voir le site</a>
+                        <button class="btn btn-primary" type="button" onclick="logoutAdmin()">
+                            Déconnexion
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-panel">
+
+                    <!-- Formulaire produit -->
+                    <form class="admin-product-form" id="adminProductForm" onsubmit="addCustomProduct(event)">
+                        <div class="admin-form-grid">
+                            <div class="form-group">
+                                <label for="adminProductName">Nom du produit *</label>
+                                <input id="adminProductName" type="text" placeholder="Ex: Congélateur Hisense" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="adminProductPrice">Prix (FCFA) *</label>
+                                <input id="adminProductPrice" type="number" placeholder="250000" min="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="adminProductCategory">Catégorie *</label>
+                                <select id="adminProductCategory" required>
+                                    <option value="">-- Sélectionnez --</option>
+                                    <option value="refrigeration">Réfrigération</option>
+                                    <option value="washing">Lavage</option>
+                                    <option value="cooking">Cuisson</option>
+                                    <option value="climate">Climatisation</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="adminProductImage">Photos * (max 5, première = photo principale)</label>
+                                <input id="adminProductImage" type="file" accept="image/*" multiple required>
+                                <small style="color:#666;font-size:0.8rem;">Maintenez Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs photos à la fois.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description *</label>
+                            <div id="adminProductDescriptionEditor" style="background:white;border-radius:6px;min-height:120px;"></div>
+                            <input type="hidden" id="adminProductDescription">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="adminProductVariants">Couleurs disponibles (optionnel)</label>
+                            <input id="adminProductVariants" type="text" placeholder="Ex: Blanc, Noir, Gris (séparées par des virgules)">
+                            <small style="color:#666;font-size:0.8rem;">Laisser vide si le produit n'a pas de variantes de couleur.</small>
+                        </div>
+
+                        <div class="admin-actions">
+                            <button class="btn btn-primary" type="submit">
+                                Ajouter au catalogue
+                            </button>
+
+                            <button class="btn btn-secondary" type="reset">
+                                Effacer
+                            </button>
+                        </div>
+
+                        <p class="admin-message" id="adminMessage" aria-live="polite"></p>
+                    </form>
+
+                    <!-- Liste produits -->
+                    <div class="admin-products-list" id="customProductsList"></div>
+
+                    <hr class="admin-separator">
+
+                    <!-- Commandes -->
+                    <div class="admin-orders-section">
+                        <div class="admin-orders-header">
+                            <h2>Commandes enregistrées</h2>
+
+                            <div class="admin-orders-tools">
+                                <input
+                                    id="orderSearchInput"
+                                    class="admin-search-input"
+                                    type="search"
+                                    placeholder="Rechercher une commande..."
+                                    oninput="filterOrders()"
+                                >
+
+                                <button class="btn btn-secondary" type="button" onclick="clearOrders()">
+                                    Supprimer l'historique
+                                </button>
+                            </div>
+
+                            <!-- Toggle commandes non payées -->
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 12px;background:#fff3cd;border-radius:8px;border:1px solid #ffc107;">
+                                <span style="font-size:0.85rem;color:#856404;flex:1;">
+                                    ⚠️ Les commandes <strong>en attente</strong> et <strong>échouées</strong> sont masquées par défaut.
+                                </span>
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;">
+                                    <input type="checkbox" id="showUnpaidOrders" onchange="filterOrders()" style="width:16px;height:16px;">
+                                    <span style="font-size:0.85rem;color:#856404;font-weight:600;">Afficher toutes</span>
+                                </label>
+                            </div>
+
+                            <div class="admin-status-filters">
+                                <button class="status-filter-btn active" type="button" data-status="all" onclick="filterOrdersByStatus('all', this)">
+                                    Toutes
+                                </button>
+
+                                <button class="status-filter-btn" type="button" data-status="Nouvelle" onclick="filterOrdersByStatus('Nouvelle', this)">
+                                    Nouvelle
+                                </button>
+
+                                <button class="status-filter-btn" type="button" data-status="En traitement" onclick="filterOrdersByStatus('En traitement', this)">
+                                    En traitement
+                                </button>
+
+                                <button class="status-filter-btn" type="button" data-status="Livrée" onclick="filterOrdersByStatus('Livrée', this)">
+                                    Livrée
+                                </button>
+
+                                <button class="status-filter-btn" type="button" data-status="Annulée" onclick="filterOrdersByStatus('Annulée', this)">
+                                    Annulée
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="admin-orders-list" id="ordersList"></div>
+                    </div>
+
+                    <hr class="admin-separator">
+
+                    <!-- Avis clients -->
+                    <div class="admin-orders-section">
+                        <div class="admin-orders-header">
+                            <h2>Avis clients</h2>
+                        </div>
+                        <div id="adminReviewsList">
+                            <p style="color:#888;font-size:0.85rem;">Chargement des avis...</p>
+                        </div>
+                    </div>
+
+                    <hr class="admin-separator">
+
+                    <!-- Codes promo -->
+                    <div class="admin-orders-section">
+                        <div class="admin-orders-header">
+                            <h2>Codes promo</h2>
+                        </div>
+
+                        <!-- Formulaire création code promo -->
+                        <div style="background:#f8f9fa;border-radius:10px;padding:1.25rem;margin-bottom:1rem;">
+                            <h3 style="font-size:0.95rem;margin:0 0 12px;color:#1a1a2e;">Créer un code promo</h3>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;">
+                                <div>
+                                    <label style="font-size:0.8rem;color:#555;display:block;margin-bottom:4px;">Code *</label>
+                                    <input type="text" id="newPromoCode" placeholder="NOEL2026" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-family:inherit;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.8rem;color:#555;display:block;margin-bottom:4px;">Réduction (%) *</label>
+                                    <input type="number" id="newPromoDiscount" placeholder="10" min="1" max="100" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-family:inherit;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.8rem;color:#555;display:block;margin-bottom:4px;">Valide jusqu'au</label>
+                                    <input type="date" id="newPromoExpiry" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-family:inherit;">
+                                </div>
+                                <button onclick="createPromoCode()" style="background:#1a73e8;color:white;border:none;border-radius:6px;padding:8px 16px;cursor:pointer;font-family:inherit;white-space:nowrap;">
+                                    Créer
+                                </button>
+                            </div>
+                            <p id="promoAdminMessage" style="font-size:0.82rem;margin-top:8px;"></p>
+                        </div>
+
+                        <div id="adminPromoList">
+                            <p style="color:#888;font-size:0.85rem;">Chargement des codes promo...</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal édition produit -->
+    <div id="editProductModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+        <div style="background:#fff; border-radius:12px; padding:32px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <h3 style="margin:0 0 24px; font-size:1.2rem;">Modifier le produit</h3>
+            <input type="hidden" id="editProductId">
+
+            <div class="form-group">
+                <label for="editProductName">Nom du produit *</label>
+                <input type="text" id="editProductName" placeholder="Ex: Réfrigérateur Samsung">
+            </div>
+
+            <div class="form-group">
+                <label>Description *</label>
+                <div id="editProductDescEditor" style="background:white;border-radius:6px;min-height:120px;"></div>
+                <input type="hidden" id="editProductDesc">
+            </div>
+
+            <div class="form-group">
+                <label for="editProductCat">Catégorie *</label>
+                <select id="editProductCat">
+                    <option value="refrigeration">Réfrigération</option>
+                    <option value="washing">Lavage</option>
+                    <option value="cooking">Cuisson</option>
+                    <option value="climate">Climatisation</option>
+                    <option value="other">Autre</option>
+                </select>
+            </div>
+
+            <div class="admin-form-grid">
+                <div class="form-group">
+                    <label for="editProductPrice">Prix (FCFA) *</label>
+                    <input type="number" id="editProductPrice" min="0" placeholder="250000">
+                </div>
+
+                <div class="form-group">
+                    <label for="editProductOldPrice">Prix barré (FCFA)</label>
+                    <input type="number" id="editProductOldPrice" min="0" placeholder="Laisser vide si aucun">
+                </div>
+
+                <div class="form-group">
+                    <label for="editProductStock">Stock</label>
+                    <input type="number" id="editProductStock" min="0" placeholder="0">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:24px; margin-bottom:24px;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="editProductPromo"> En promo
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="editProductActive"> Actif sur le site
+                </label>
+            </div>
+
+            <!-- Galerie photos existantes -->
+            <div class="form-group">
+                <label>Photos actuelles</label>
+                <div id="editProductGallery" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; min-height:60px; padding:8px; background:#f5f5f5; border-radius:8px;">
+                    <span style="color:#999; font-size:0.85rem; align-self:center;">Chargement...</span>
+                </div>
+                <small style="color:#666; font-size:0.8rem;">Cliquez sur ✕ pour supprimer une photo.</small>
+            </div>
+
+            <!-- Ajout de nouvelles photos -->
+            <div class="form-group">
+                <label for="editProductImages">Ajouter des photos (max 5 au total)</label>
+                <input type="file" id="editProductImages" accept="image/*" multiple
+                    onchange="previewNewImages(this)">
+                <small style="color:#666; font-size:0.8rem;">Maintenez Ctrl pour sélectionner plusieurs photos.</small>
+                <!-- Prévisualisation avec association couleur -->
+                <div id="newImagesColorAssign" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;"></div>
+            </div>
+
+            <!-- Variantes de couleur -->
+            <div class="form-group">
+                <label for="editProductVariants">Couleurs disponibles (optionnel)</label>
+                <input type="text" id="editProductVariants" placeholder="Ex: Blanc, Noir, Gris (séparées par des virgules)">
+                <small style="color:#666; font-size:0.8rem;">Laisser vide si le produit n'a pas de variantes de couleur.</small>
+            </div>
+
+            <div style="display:flex; gap:12px; justify-content:flex-end;">
+                <button class="btn btn-secondary" type="button" onclick="closeEditProductModal()">
+                    Annuler
+                </button>
+                <button class="btn btn-primary" type="button" onclick="saveProductEdits()">
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts externes -->
+    <style>
+        .edit-gallery-thumb {
+            position: relative;
+            width: 72px;
+            height: 72px;
+        }
+        .edit-gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        .edit-gallery-thumb button {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            padding: 0;
+        }
+        .edit-gallery-thumb button:hover {
+            background: #c0392b;
+        }
+
+        /* Styles éditeur Quill dans l'admin */
+        .ql-toolbar.ql-snow {
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            background: #f9f9f9;
+        }
+        .ql-container.ql-snow {
+            border: 1px solid #ddd;
+            border-radius: 0 0 8px 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        .ql-editor {
+            min-height: 120px;
+        }
+        .ql-editor p { margin-bottom: 0.5rem; }
+        .ql-editor ul, .ql-editor ol { padding-left: 1.5rem; margin-bottom: 0.5rem; }
+
+        /* Styles de la description dans la fiche produit */
+        #modalDescription p { margin-bottom: 0.5rem; }
+        #modalDescription ul, #modalDescription ol { padding-left: 1.5rem; margin-bottom: 0.5rem; }
+        #modalDescription strong { font-weight: 700; }
+        #modalDescription h2, #modalDescription h3 { font-weight: 700; margin-bottom: 0.5rem; color: #1a1a2e; }
+    </style>
+
+    <!-- Scripts externes -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://www.paiementpro.net/webservice/onlinepayment/js/paiementpro.v1.0.1.js"></script>
+
+    <!-- Script principal du site -->
+    <script src="script.js?v=10"></script>
+
+    <!-- Script spécifique à la connexion admin -->
+    <script>
+        // Configuration de la barre d'outils Quill
+        const quillToolbar = [
+            [{ 'header': [2, 3, false] }],
+            ['bold', 'italic', 'underline'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['clean']
+        ];
+
+        // Éditeur pour le formulaire d'ajout
+        const quillAdd = new Quill('#adminProductDescriptionEditor', {
+            theme: 'snow',
+            placeholder: 'Décrivez l\'article (caractéristiques, dimensions, garantie...)',
+            modules: { toolbar: quillToolbar }
+        });
+
+        // Éditeur pour le modal de modification (initialisé une fois le DOM prêt)
+        let quillEdit = null;
+
+        function initQuillEdit() {
+            if (!quillEdit) {
+                quillEdit = new Quill('#editProductDescEditor', {
+                    theme: 'snow',
+                    placeholder: 'Décrivez l\'article...',
+                    modules: { toolbar: quillToolbar }
+                });
+            }
+        }
+
+        // Expose les éditeurs globalement pour y accéder depuis script.js
+        window.quillAdd  = quillAdd;
+        window.getQuillEdit = function() {
+            initQuillEdit();
+            return quillEdit;
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAdminView();
+        });
+
+        async function loginAdmin(e) {
+            e.preventDefault();
+
+            const emailInput = document.getElementById('adminEmail');
+            const passwordInput = document.getElementById('adminPassword');
+            const message = document.getElementById('loginMessage');
+
+            if (!emailInput || !passwordInput || !message) {
+                alert('Erreur : champs de connexion introuvables.');
+                return;
+            }
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            message.textContent = 'Connexion en cours...';
+            message.style.color = '#555';
+
+            try {
+                const { error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    message.textContent = 'Email ou mot de passe incorrect.';
+                    message.style.color = '#e74c3c';
+                    return;
+                }
+
+                const isAdmin = await checkCurrentUserIsAdmin();
+
+                if (!isAdmin) {
+                    await supabaseClient.auth.signOut();
+
+                    message.textContent = 'Accès refusé : ce compte n’est pas administrateur.';
+                    message.style.color = '#e74c3c';
+                    return;
+                }
+
+                message.textContent = '';
+                passwordInput.value = '';
+
+                await updateAdminView();
+            } catch (error) {
+                console.error('Erreur connexion admin:', error);
+                message.textContent = 'Erreur de connexion.';
+                message.style.color = '#e74c3c';
+            }
+        }
+
+        async function logoutAdmin() {
+            await supabaseClient.auth.signOut();
+
+            const emailInput = document.getElementById('adminEmail');
+            const passwordInput = document.getElementById('adminPassword');
+            const loginMessage = document.getElementById('loginMessage');
+            const adminMessage = document.getElementById('adminMessage');
+
+            if (emailInput) {
+                emailInput.value = '';
+            }
+
+            if (passwordInput) {
+                passwordInput.value = '';
+            }
+
+            if (loginMessage) {
+                loginMessage.textContent = '';
+            }
+
+            if (adminMessage) {
+                adminMessage.textContent = '';
+            }
+
+            await updateAdminView();
+        }
+
+        async function updateAdminView() {
+            const adminLogin = document.getElementById('adminLogin');
+            const adminDashboard = document.getElementById('adminDashboard');
+
+            if (!adminLogin || !adminDashboard) {
+                console.error('Sections admin introuvables.');
+                return;
+            }
+
+            const { data } = await supabaseClient.auth.getSession();
+            const isLoggedIn = Boolean(data.session);
+
+            if (!isLoggedIn) {
+                adminLogin.hidden = false;
+                adminLogin.style.display = 'flex';
+
+                adminDashboard.hidden = true;
+                adminDashboard.style.display = 'none';
+
+                return;
+            }
+
+            const isAdmin = await checkCurrentUserIsAdmin();
+
+            if (!isAdmin) {
+                await supabaseClient.auth.signOut();
+
+                adminLogin.hidden = false;
+                adminLogin.style.display = 'flex';
+
+                adminDashboard.hidden = true;
+                adminDashboard.style.display = 'none';
+
+                return;
+            }
+
+            adminLogin.hidden = true;
+            adminLogin.style.display = 'none';
+
+            adminDashboard.hidden = false;
+            adminDashboard.style.display = 'block';
+
+            if (typeof renderCustomProductsList === 'function') {
+                await renderCustomProductsList();
+            }
+
+            if (typeof window.filterOrders === 'function') {
+                await window.filterOrders();
+            }
+
+            if (typeof updateAdminStats === 'function') {
+                await updateAdminStats();
+            }
+
+            await loadAdminReviews();
+            await loadAdminPromos();
+        }
+
+        async function createPromoCode() {
+            const code     = document.getElementById('newPromoCode').value.trim().toUpperCase();
+            const discount = parseInt(document.getElementById('newPromoDiscount').value);
+            const expiry   = document.getElementById('newPromoExpiry').value;
+            const msg      = document.getElementById('promoAdminMessage');
+
+            if (!code || !discount || discount < 1 || discount > 100) {
+                msg.style.color = '#e74c3c';
+                msg.textContent = 'Code et reduction (1-100%) obligatoires.';
+                return;
+            }
+
+            const { error } = await supabaseClient.from('promo_codes').insert({
+                code, discount_percent: discount, valid_until: expiry || null, is_active: true
+            });
+
+            if (error) {
+                msg.style.color = '#e74c3c';
+                msg.textContent = error.code === '23505' ? 'Ce code existe deja.' : 'Erreur creation.';
+                return;
+            }
+
+            msg.style.color = '#16a34a';
+            msg.textContent = 'Code ' + code + ' cree avec succes !';
+            document.getElementById('newPromoCode').value = '';
+            document.getElementById('newPromoDiscount').value = '';
+            document.getElementById('newPromoExpiry').value = '';
+            await loadAdminPromos();
+        }
+
+        async function togglePromoStatus(id, currentStatus) {
+            await supabaseClient.from('promo_codes').update({ is_active: !currentStatus }).eq('id', id);
+            await loadAdminPromos();
+        }
+
+        async function deletePromoCode(id) {
+            if (!confirm('Supprimer ce code promo ?')) return;
+            await supabaseClient.from('promo_codes').delete().eq('id', id);
+            await loadAdminPromos();
+        }
+
+        async function loadAdminPromos() {
+            const container = document.getElementById('adminPromoList');
+            if (!container) return;
+
+            const { data: promos } = await supabaseClient
+                .from('promo_codes')
+                .select('id, code, discount_percent, is_active, valid_until, created_at')
+                .order('created_at', { ascending: false });
+
+            if (!promos || promos.length === 0) {
+                container.innerHTML = '<p style="color:#888;font-size:0.85rem;">Aucun code promo cree.</p>';
+                return;
+            }
+
+            container.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
+                '<thead><tr style="background:#f5f5f5;">' +
+                    '<th style="padding:8px;text-align:left;">Code</th>' +
+                    '<th style="padding:8px;text-align:center;">Reduction</th>' +
+                    '<th style="padding:8px;text-align:center;">Validite</th>' +
+                    '<th style="padding:8px;text-align:center;">Statut</th>' +
+                    '<th style="padding:8px;text-align:center;">Actions</th>' +
+                '</tr></thead><tbody>' +
+                promos.map(function(p) {
+                    const expiry = p.valid_until ? new Date(p.valid_until).toLocaleDateString('fr-FR') : 'Illimite';
+                    const statusLabel = p.is_active
+                        ? '<span style="color:#16a34a;font-weight:600;">Actif</span>'
+                        : '<span style="color:#aaa;">Inactif</span>';
+                    return '<tr style="border-bottom:1px solid #eee;">' +
+                        '<td style="padding:8px;font-weight:700;letter-spacing:1px;">' + p.code + '</td>' +
+                        '<td style="padding:8px;text-align:center;">-' + p.discount_percent + '%</td>' +
+                        '<td style="padding:8px;text-align:center;">' + expiry + '</td>' +
+                        '<td style="padding:8px;text-align:center;">' + statusLabel + '</td>' +
+                        '<td style="padding:8px;display:flex;gap:6px;justify-content:center;">' +
+                            '<button onclick="togglePromoStatus(\'' + p.id + '\', ' + p.is_active + ')" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;cursor:pointer;font-size:0.78rem;background:white;">' +
+                                (p.is_active ? 'Desactiver' : 'Activer') +
+                            '</button>' +
+                            '<button onclick="deletePromoCode(\'' + p.id + '\')" style="padding:4px 8px;border:none;border-radius:4px;cursor:pointer;font-size:0.78rem;background:#e74c3c;color:white;">Supprimer</button>' +
+                        '</td>' +
+                    '</tr>';
+                }).join('') +
+                '</tbody></table>';
+        }
+
+        async function loadAdminReviews() {
+            const container = document.getElementById('adminReviewsList');
+            if (!container) return;
+
+            const { data: reviews, error } = await supabaseClient
+                .from('reviews')
+                .select('id, product_id, customer_name, rating, comment, order_reference, created_at, verified')
+                .order('created_at', { ascending: false });
+
+            if (error || !reviews || reviews.length === 0) {
+                container.innerHTML = '<p style="color:#888;font-size:0.85rem;">Aucun avis pour le moment.</p>';
+                return;
+            }
+
+            // Récupérer les noms des produits
+            const productIds = [...new Set(reviews.map(r => r.product_id))];
+            const { data: products } = await supabaseClient
+                .from('products')
+                .select('id, name')
+                .in('id', productIds);
+
+            const productMap = {};
+            (products || []).forEach(function(p) { productMap[p.id] = p.name; });
+
+            container.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
+                '<thead><tr style="background:#f5f5f5;">' +
+                    '<th style="padding:8px;text-align:left;">Produit</th>' +
+                    '<th style="padding:8px;text-align:left;">Client</th>' +
+                    '<th style="padding:8px;text-align:center;">Note</th>' +
+                    '<th style="padding:8px;text-align:left;">Commentaire</th>' +
+                    '<th style="padding:8px;text-align:left;">Référence</th>' +
+                    '<th style="padding:8px;text-align:center;">Action</th>' +
+                '</tr></thead><tbody>' +
+                reviews.map(function(r) {
+                    const date = new Date(r.created_at).toLocaleDateString('fr-FR');
+                    const stars = '⭐'.repeat(r.rating);
+                    const productName = productMap[r.product_id] || 'Produit #' + r.product_id;
+                    return '<tr style="border-bottom:1px solid #eee;">' +
+                        '<td style="padding:8px;">' + productName + '<br><span style="color:#aaa;font-size:0.75rem;">' + date + '</span></td>' +
+                        '<td style="padding:8px;">' + (r.customer_name || '—') + '</td>' +
+                        '<td style="padding:8px;text-align:center;">' + stars + '</td>' +
+                        '<td style="padding:8px;">' + (r.comment || '<span style="color:#aaa;">Pas de commentaire</span>') + '</td>' +
+                        '<td style="padding:8px;">' + r.order_reference + '</td>' +
+                        '<td style="padding:8px;text-align:center;">' +
+                            '<button onclick="deleteReview(\'' + r.id + '\')" style="background:#e74c3c;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Supprimer</button>' +
+                        '</td>' +
+                    '</tr>';
+                }).join('') +
+                '</tbody></table>';
+        }
+
+        async function deleteReview(reviewId) {
+            if (!confirm('Supprimer cet avis ?')) return;
+            const { error } = await supabaseClient
+                .from('reviews')
+                .delete()
+                .eq('id', reviewId);
+            if (error) {
+                alert('Erreur lors de la suppression.');
+                return;
+            }
+            await loadAdminReviews();
+        }
+
+        async function checkCurrentUserIsAdmin() {
+            const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+
+            if (userError || !userData.user) {
+                return false;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('admin_users')
+                .select('id')
+                .eq('user_id', userData.user.id)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Erreur vérification admin:', error);
+                return false;
+            }
+
+            return Boolean(data);
+        }
+    </script>
+</body>
+</html>
