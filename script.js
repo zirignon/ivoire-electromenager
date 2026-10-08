@@ -103,7 +103,7 @@ const promoProducts = [
     }
 ];
 
-const VALID_CATEGORIES = ['refrigeration', 'washing', 'cooking', 'climate', 'other'];
+const VALID_CATEGORIES = ['electromenager', 'hightech', 'maison', 'beaute', 'enfants'];
 // Numéro WhatsApp de la boutique.
 // Remplace par ton vrai numéro au format international, sans +, sans espace.
 const STORE_WHATSAPP_NUMBER = '2250141364716';
@@ -1169,11 +1169,11 @@ async function submitReview() {
 
 function getCategoryLabel(category) {
     const labels = {
-        refrigeration: 'Réfrigération',
-        washing: 'Lavage',
-        cooking: 'Cuisson',
-        climate: 'Climatisation',
-        other: 'Autre'
+        electromenager: 'Électroménager',
+        hightech: 'High-Tech',
+        maison: 'Maison & Décoration',
+        beaute: 'Beauté & Santé',
+        enfants: 'Enfants & Jouets'
     };
 
     return labels[category] || 'Autre';
